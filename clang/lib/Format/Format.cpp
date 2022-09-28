@@ -806,8 +806,8 @@ template <> struct MappingTraits<FormatStyle> {
 
     StringRef BasedOnStyle;
     if (IO.outputting()) {
-      StringRef Styles[] = {"LLVM",   "Google", "Chromium", "Mozilla",
-                            "WebKit", "GNU",    "Microsoft"};
+      StringRef Styles[] = {"LLVM",   "Google", "Chromium",  "Mozilla",
+                            "WebKit", "GNU",    "Microsoft", "Graphisoft"};
       for (StringRef StyleName : Styles) {
         FormatStyle PredefinedStyle;
         if (getPredefinedStyle(StyleName, Style.Language, &PredefinedStyle) &&
@@ -1882,6 +1882,53 @@ FormatStyle getMicrosoftStyle(FormatStyle::LanguageKind Language) {
   return Style;
 }
 
+FormatStyle getGraphisoftStyle() {
+  FormatStyle Style = getLLVMStyle();
+  Style.AccessModifierOffset = -4;
+  Style.AlignConsecutiveAssignments.Enabled = true;
+  Style.AlignConsecutiveBitFields.Enabled = true;
+  Style.AlignConsecutiveBitFields.PadOperators = true;
+  Style.AlignConsecutiveDeclarations.Enabled = true;
+  Style.AlignConsecutiveDeclarations.PadOperators = true;
+  Style.AlignConsecutiveMacros.Enabled = true;
+  Style.AlignConsecutiveMacros.PadOperators = true;
+  Style.AlignEscapedNewlines = FormatStyle::ENAS_DontAlign;
+  Style.AllowShortEnumsOnASingleLine = false;
+  Style.AllowShortBlocksOnASingleLine = FormatStyle::SBS_Empty;
+  Style.AllowShortFunctionsOnASingleLine = FormatStyle::SFS_Inline;
+  Style.AllowShortIfStatementsOnASingleLine = FormatStyle::SIS_WithoutElse;
+  Style.AlwaysBreakTemplateDeclarations = FormatStyle::BTDS_Yes;
+  Style.BinPackArguments = false;
+  Style.BinPackParameters = false;
+  Style.BraceWrapping.AfterClass = true;
+  Style.BraceWrapping.AfterControlStatement = FormatStyle::BWACS_MultiLine;
+  Style.BraceWrapping.AfterFunction = true;
+  Style.BraceWrapping.AfterStruct = true;
+  Style.BraceWrapping.AfterUnion = true;
+  Style.BreakBeforeBraces = FormatStyle::BS_Custom;
+  Style.BreakInheritanceList = FormatStyle::BILS_AfterComma;
+  Style.BreakConstructorInitializers = FormatStyle::BCIS_AfterColon;
+  Style.ColumnLimit = 120u;
+  Style.QualifierAlignment = FormatStyle::QAS_Left;
+  Style.EmptyLineBeforeAccessModifier = FormatStyle::ELBAMS_Always;
+  Style.PackConstructorInitializers = FormatStyle::PCIS_CurrentLine;
+  Style.IndentCaseLabels = true;
+  Style.IndentRequiresClause = false;
+  Style.IndentWidth = 4u;
+  Style.PointerAlignment = FormatStyle::PAS_Left;
+  Style.SeparateDefinitionBlocks = FormatStyle::SDS_Always;
+  Style.SpaceBeforeCpp11BracedList = true;
+  Style.SpaceBeforeParens = FormatStyle::SBPO_Always;
+  Style.SpaceBeforeParensOptions.AfterControlStatements = false;
+  Style.SpaceBeforeParensOptions.AfterForeachMacros = false;
+  Style.SpaceBeforeParensOptions.AfterIfMacros = false;
+  Style.Standard = FormatStyle::LS_Cpp17;
+  Style.TabWidth = 4u;
+  Style.UseTab = FormatStyle::UT_Always;
+
+  return Style;
+}
+
 FormatStyle getNoStyle() {
   FormatStyle NoStyle = getLLVMStyle();
   NoStyle.DisableFormat = true;
@@ -1906,6 +1953,8 @@ bool getPredefinedStyle(StringRef Name, FormatStyle::LanguageKind Language,
     *Style = getGNUStyle();
   else if (Name.equals_insensitive("microsoft"))
     *Style = getMicrosoftStyle(Language);
+  else if (Name.equals_insensitive("graphisoft"))
+    *Style = getGraphisoftStyle();
   else if (Name.equals_insensitive("none"))
     *Style = getNoStyle();
   else if (Name.equals_insensitive("inheritparentconfig"))
@@ -3818,7 +3867,7 @@ LangOptions getFormattingLangOpts(const FormatStyle &Style) {
 const char *StyleOptionHelpDescription =
     "Set coding style. <string> can be:\n"
     "1. A preset: LLVM, GNU, Google, Chromium, Microsoft,\n"
-    "   Mozilla, WebKit.\n"
+    "   Mozilla, WebKit, Graphisoft.\n"
     "2. 'file' to load style configuration from a\n"
     "   .clang-format file in one of the parent directories\n"
     "   of the source file (for stdin, see --assume-filename).\n"
@@ -3886,7 +3935,7 @@ FormatStyle::LanguageKind guessLanguage(StringRef FileName, StringRef Code) {
 // Update StyleOptionHelpDescription above when changing this.
 const char *DefaultFormatStyle = "file";
 
-const char *DefaultFallbackStyle = "LLVM";
+const char *DefaultFallbackStyle = "Graphisoft";
 
 llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>>
 loadAndParseConfigFile(StringRef ConfigFile, llvm::vfs::FileSystem *FS,
