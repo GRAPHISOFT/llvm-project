@@ -65,8 +65,9 @@ void DefinitionBlockSeparator::separateBlocks(
     }
     return false;
   };
-  unsigned NewlineCount =
-      (Style.SeparateDefinitionBlocks == FormatStyle::SDS_Always ? 1 : 0) + 1;
+  // FIXME(HVA): figure out a way to not hard code the value, maybe add a style
+  // option?
+  unsigned NewlineCount = 3u;
   WhitespaceManager Whitespaces(
       Env.getSourceManager(), Style,
       Style.LineEnding > FormatStyle::LE_CRLF

@@ -1444,8 +1444,29 @@ static auto computeNewlines(const AnnotatedLine &Line,
                             const SmallVectorImpl<AnnotatedLine *> &Lines,
                             const FormatStyle &Style) {
   const auto &RootToken = *Line.First;
+  auto LikelyFunctionDef = [](const AnnotatedLine &Line) {
+    return Line.MightBeFunctionDecl && Line.mightBeFunctionDefinition();
+  };
+  auto LikelyFunctionDefBeforePrevBlock = [&](const AnnotatedLine &Line) {
+    if (!Line.endsWith(tok::r_brace))
+      return false;
+
+    size_t OpeningLineIndex = Line.MatchingOpeningBlockLineIndex;
+    if (OpeningLineIndex == 0 ||
+        OpeningLineIndex == UnwrappedLine::kInvalidIndex) {
+      return false;
+    }
+
+    return LikelyFunctionDef(*Lines[OpeningLineIndex - 1]);
+  };
+  // FIXME(HVA): figure out a way to not hard code the value, maybe add a style
+  // option?
   auto Newlines =
-      std::min(RootToken.NewlinesBefore, Style.MaxEmptyLinesToKeep + 1);
+      LikelyFunctionDef(Line) ||
+              (PreviousLine != nullptr &&
+               LikelyFunctionDefBeforePrevBlock(*PreviousLine))
+          ? 3u
+          : std::min(RootToken.NewlinesBefore, Style.MaxEmptyLinesToKeep + 1);
   // Remove empty lines before "}" where applicable.
   if (RootToken.is(tok::r_brace) &&
       (!RootToken.Next ||
