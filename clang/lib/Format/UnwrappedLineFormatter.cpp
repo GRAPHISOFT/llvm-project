@@ -1438,35 +1438,18 @@ unsigned UnwrappedLineFormatter::format(
   return Penalty;
 }
 
-static auto computeNewlines(const AnnotatedLine &Line,
+static auto computeNewlines(const WhitespaceManager *Whitespaces,
+                            const AnnotatedLine &Line,
                             const AnnotatedLine *PreviousLine,
                             const AnnotatedLine *PrevPrevLine,
                             const SmallVectorImpl<AnnotatedLine *> &Lines,
                             const FormatStyle &Style) {
   const auto &RootToken = *Line.First;
-  auto LikelyFunctionDef = [](const AnnotatedLine &Line) {
-    return Line.MightBeFunctionDecl && Line.mightBeFunctionDefinition();
-  };
-  auto LikelyFunctionDefBeforePrevBlock = [&](const AnnotatedLine &Line) {
-    if (!Line.endsWith(tok::r_brace))
-      return false;
-
-    size_t OpeningLineIndex = Line.MatchingOpeningBlockLineIndex;
-    if (OpeningLineIndex == 0 ||
-        OpeningLineIndex == UnwrappedLine::kInvalidIndex) {
-      return false;
-    }
-
-    return LikelyFunctionDef(*Lines[OpeningLineIndex - 1]);
-  };
-  // FIXME(HVA): figure out a way to not hard code the value, maybe add a style
-  // option?
   auto Newlines =
-      LikelyFunctionDef(Line) ||
-              (PreviousLine != nullptr &&
-               LikelyFunctionDefBeforePrevBlock(*PreviousLine))
-          ? 3u
-          : std::min(RootToken.NewlinesBefore, Style.MaxEmptyLinesToKeep + 1);
+      Whitespaces->calculateNewlinesCountOrElse(Lines, Line, PreviousLine, [&] {
+        return std::min(RootToken.NewlinesBefore,
+                        Style.MaxEmptyLinesToKeep + 1);
+      });
   // Remove empty lines before "}" where applicable.
   if (RootToken.is(tok::r_brace) &&
       (!RootToken.Next ||
@@ -1564,8 +1547,8 @@ void UnwrappedLineFormatter::formatFirstToken(
   }
 
   if (RootToken.Newlines < 0) {
-    RootToken.Newlines =
-        computeNewlines(Line, PreviousLine, PrevPrevLine, Lines, Style);
+    RootToken.Newlines = computeNewlines(Whitespaces, Line, PreviousLine,
+                                         PrevPrevLine, Lines, Style);
     assert(RootToken.Newlines >= 0);
   }
 

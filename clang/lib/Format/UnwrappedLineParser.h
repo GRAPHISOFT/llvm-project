@@ -78,6 +78,8 @@ struct UnwrappedLine {
   static const size_t kInvalidIndex = -1;
 
   unsigned FirstStartColumn = 0;
+
+  bool IsInStructLike = false;
 };
 
 /// Interface for users of the UnwrappedLineParser to receive the parsed lines.
@@ -401,6 +403,8 @@ private:
   unsigned FirstStartColumn;
 
   MacroExpander Macros;
+
+  bool ParsingStructLike;
 
   friend class ScopedLineState;
   friend class CompoundStatementIndenter;

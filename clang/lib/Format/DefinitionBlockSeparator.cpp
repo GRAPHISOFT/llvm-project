@@ -65,9 +65,6 @@ void DefinitionBlockSeparator::separateBlocks(
     }
     return false;
   };
-  // FIXME(HVA): figure out a way to not hard code the value, maybe add a style
-  // option?
-  unsigned NewlineCount = 3u;
   WhitespaceManager Whitespaces(
       Env.getSourceManager(), Style,
       Style.LineEnding > FormatStyle::LE_CRLF
@@ -75,6 +72,16 @@ void DefinitionBlockSeparator::separateBlocks(
                 Env.getSourceManager().getBufferData(Env.getFileID()),
                 Style.LineEnding == FormatStyle::LE_DeriveCRLF)
           : Style.LineEnding == FormatStyle::LE_CRLF);
+  auto NewlineCount = [&](size_t I) {
+    const AnnotatedLine *PreviousLine = I == 0 ? nullptr : Lines[I - 1];
+    return Whitespaces.calculateNewlinesCountOrElse(
+        Lines, *Lines[I], PreviousLine, [&] {
+          return (Style.SeparateDefinitionBlocks == FormatStyle::SDS_Always
+                      ? 1
+                      : 0) +
+                 1;
+        });
+  };
   for (unsigned I = 0; I < Lines.size(); ++I) {
     const auto &CurrentLine = Lines[I];
     if (CurrentLine->InPPDirective)
@@ -183,7 +190,7 @@ void DefinitionBlockSeparator::separateBlocks(
       TargetLine = OpeningLine;
       TargetToken = TargetLine->First;
       if (!FollowingOtherOpening())
-        InsertReplacement(NewlineCount);
+        InsertReplacement(NewlineCount(I));
       else if (IsNeverStyle)
         InsertReplacement(OpeningLineIndex != 0);
       TargetLine = CurrentLine;
@@ -216,7 +223,7 @@ void DefinitionBlockSeparator::separateBlocks(
         if (!FollowingOtherOpening()) {
           // Avoid duplicated replacement.
           if (TargetToken->isNot(tok::l_brace))
-            InsertReplacement(NewlineCount);
+            InsertReplacement(NewlineCount(I));
         } else if (IsNeverStyle) {
           InsertReplacement(OpeningLineIndex != 0);
         }
@@ -243,7 +250,7 @@ void DefinitionBlockSeparator::separateBlocks(
           OpeningLineIndex = I + 1;
           TargetLine = Lines[I + 1];
           TargetToken = TargetLine->First;
-          InsertReplacement(NewlineCount);
+          InsertReplacement(NewlineCount(I));
         }
       } else if (IsNeverStyle) {
         InsertReplacement(/*NewlineToInsert=*/1);

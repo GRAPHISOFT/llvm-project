@@ -89,6 +89,11 @@ public:
   /// Returns all the \c Replacements created during formatting.
   const tooling::Replacements &generateReplacements();
 
+  unsigned calculateNewlinesCountOrElse(
+      const llvm::SmallVectorImpl<AnnotatedLine *> &Lines,
+      const AnnotatedLine &CurrentLine, const AnnotatedLine *PreviousLine,
+      std::function<unsigned()> Else) const;
+
   /// Represents a change before a token, a break inside a token,
   /// or the layout of an unchanged token (or whitespace within).
   struct Change {

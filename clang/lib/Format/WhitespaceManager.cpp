@@ -115,6 +115,42 @@ const tooling::Replacements &WhitespaceManager::generateReplacements() {
   return Replaces;
 }
 
+static bool LikelyFunctionDef(const AnnotatedLine &Line) {
+  return !Line.IsInStructLike && Line.MightBeFunctionDecl &&
+         Line.mightBeFunctionDefinition();
+}
+
+static bool LikelyFunctionDefBeforePrevBlock(
+    const AnnotatedLine &Line,
+    const llvm::SmallVectorImpl<AnnotatedLine *> &Lines) {
+  if (!Line.endsWith(tok::r_brace))
+    return false;
+
+  size_t OpeningLineIndex = Line.MatchingOpeningBlockLineIndex;
+  if (OpeningLineIndex == 0 || OpeningLineIndex == UnwrappedLine::kInvalidIndex)
+    return false;
+
+  return LikelyFunctionDef(*Lines[OpeningLineIndex - 1]);
+}
+
+unsigned WhitespaceManager::calculateNewlinesCountOrElse(
+    const llvm::SmallVectorImpl<AnnotatedLine *> &Lines,
+    const AnnotatedLine &CurrentLine, const AnnotatedLine *PreviousLine,
+    std::function<unsigned()> Else) const {
+  // FIXME(HVA): figure out a way to not hard code the value, maybe add a style
+  // option?
+  constexpr unsigned NewlinesCount = 3u;
+
+  if (LikelyFunctionDef(CurrentLine))
+    return NewlinesCount;
+
+  if (PreviousLine == nullptr)
+    return Else();
+
+  return LikelyFunctionDefBeforePrevBlock(*PreviousLine, Lines) ? NewlinesCount
+                                                                : Else();
+}
+
 void WhitespaceManager::calculateLineBreakInformation() {
   Changes[0].PreviousEndOfTokenColumn = 0;
   Change *LastOutsideTokenChange = &Changes[0];
