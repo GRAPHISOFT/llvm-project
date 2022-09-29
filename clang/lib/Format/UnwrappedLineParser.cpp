@@ -339,7 +339,8 @@ UnwrappedLineParser::UnwrappedLineParser(const FormatStyle &Style,
       IncludeGuard(Style.IndentPPDirectives == FormatStyle::PPDIS_None
                        ? IG_Rejected
                        : IG_Inited),
-      IncludeGuardToken(nullptr), FirstStartColumn(FirstStartColumn) {}
+      IncludeGuardToken(nullptr), FirstStartColumn(FirstStartColumn),
+      ParsingStructLike(false) {}
 
 void UnwrappedLineParser::reset() {
   PPBranchLevel = -1;
@@ -3941,6 +3942,9 @@ void UnwrappedLineParser::parseRecord(bool ParseAsExpr) {
   };
   if (FormatTok->is(tok::l_brace)) {
     FormatTok->setFinalizedType(GetBraceType(InitialToken));
+
+    bool OldParsingStructLike = ParsingStructLike;
+    ParsingStructLike = true;
     if (ParseAsExpr) {
       parseChildBlock();
     } else {
@@ -3950,6 +3954,7 @@ void UnwrappedLineParser::parseRecord(bool ParseAsExpr) {
       unsigned AddLevels = Style.IndentAccessModifiers ? 2u : 1u;
       parseBlock(/*MustBeDeclaration=*/true, AddLevels, /*MunchSemi=*/false);
     }
+    ParsingStructLike = OldParsingStructLike;
   }
   // There is no addUnwrappedLine() here so that we fall through to parsing a
   // structural element afterwards. Thus, in "class A {} n, m;",
@@ -4358,6 +4363,7 @@ void UnwrappedLineParser::addUnwrappedLine(LineLevel AdjustLevel) {
   Line->MatchingOpeningBlockLineIndex = UnwrappedLine::kInvalidIndex;
   Line->FirstStartColumn = 0;
   Line->IsContinuation = false;
+  Line->IsInStructLike = ParsingStructLike;
 
   if (ClosesWhitesmithsBlock && AdjustLevel == LineLevel::Remove)
     --Line->Level;

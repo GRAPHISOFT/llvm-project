@@ -48,7 +48,8 @@ public:
         IsMultiVariableDeclStmt(false), Affected(false),
         LeadingEmptyLinesAffected(false), ChildrenAffected(false),
         IsContinuation(Line.IsContinuation),
-        FirstStartColumn(Line.FirstStartColumn) {
+        FirstStartColumn(Line.FirstStartColumn),
+        IsInStructLike(Line.IsInStructLike) {
     assert(!Line.Tokens.empty());
 
     // Calculate Next and Previous for all tokens. Note that we must overwrite
@@ -156,6 +157,8 @@ public:
   bool IsContinuation;
 
   unsigned FirstStartColumn;
+
+  bool IsInStructLike;
 
 private:
   // Disallow copying.

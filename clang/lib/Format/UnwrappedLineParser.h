@@ -74,6 +74,8 @@ struct UnwrappedLine {
   static const size_t kInvalidIndex = -1;
 
   unsigned FirstStartColumn = 0;
+
+  bool IsInStructLike = false;
 };
 
 class UnwrappedLineConsumer {
@@ -348,6 +350,8 @@ private:
   // normal source code and may be nonzero when formatting a code fragment that
   // does not start at the beginning of the file.
   unsigned FirstStartColumn;
+
+  bool ParsingStructLike;
 
   friend class ScopedLineState;
   friend class CompoundStatementIndenter;
