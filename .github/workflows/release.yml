@@ -1,0 +1,111 @@
+name: Release
+
+on: { push: { tags: [r*] } }
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        job: [1, 2, 3, 4, 5, 6]
+
+        include:
+        - { job: 1, os: windows-2022, arch: amd64, name: "Windows (x86_64)" }
+        - { job: 2, os: windows-2022, arch: amd64_x86, name: "Windows (x86)" }
+        - { job: 3, os: windows-2022, arch: amd64_arm64, name: "Windows (arm64)" }
+        - { job: 4, os: macos-11, arch: x86_64, name: "MacOS (x86_64)" }
+        - { job: 5, os: macos-11, arch: arm64, name: "MacOS (arm64)" }
+        - { job: 6, os: ubuntu-20.04, arch: x86_64, name: "Linux (x86_64)" }
+
+    name: Build release for ${{ matrix.name }}
+
+    runs-on: ${{ matrix.os }}
+
+    defaults: { run: { shell: pwsh } }
+
+    steps:
+    - uses: actions/checkout@v3
+
+    # GitHub provided runners are x86_64, so when targeting another architecture,
+    # native build tools have to be created
+    - name: Determine need for native build
+      id: native
+      run: |
+        $arch = '${{ matrix.arch }}'
+        $result = '1'
+        if ($arch -ceq 'x86_64' -or $arch -ceq 'amd64') { $result = '' }
+        Add-Content $env:GITHUB_OUTPUT "bool=$result"
+
+    - uses: ashutoshvarma/setup-ninja@master
+      with: { version: "1.11.1" }
+
+    - name: Enter MSVC Developer Shell (Native)
+      if: steps.native.outputs.bool
+      uses: ilammy/msvc-dev-cmd@v1
+      with: { arch: amd64 }
+
+    - name: Setup CMake query file (Native)
+      if: steps.native.outputs.bool
+      run: New-Item build-native/.cmake/api/v1/query/codemodel-v2 -ItemType File -Force >$null
+
+    - name: Create CMake cache (Native)
+      if: steps.native.outputs.bool
+      run: ./.github/scripts/cache.ps1 x86_64
+
+    - name: Configure (Native)
+      if: steps.native.outputs.bool
+      run: ./.github/scripts/configure.ps1 build-native
+
+    - name: Build (Native)
+      if: steps.native.outputs.bool
+      run: cmake --build build-native -t clang-tblgen llvm-tblgen
+
+    - name: Add build tools to the env (Native)
+      if: steps.native.outputs.bool
+      run: ./.github/scripts/add-native-to-env.ps1
+
+    - name: Enter MSVC Developer Shell
+      uses: ilammy/msvc-dev-cmd@v1
+      with: { arch: "${{ matrix.arch }}" }
+
+    - name: Setup CMake query file
+      run: New-Item build/.cmake/api/v1/query/codemodel-v2 -ItemType File -Force >$null
+
+    - name: Create CMake cache
+      run: ./.github/scripts/cache.ps1 '${{ matrix.arch }}'
+
+    - name: Configure
+      run: ./.github/scripts/configure.ps1 build
+
+    - name: Build
+      run: cmake --build build -t clang-format
+
+    - name: Prepare clang-format
+      id: prepare
+      run: ./.github/scripts/prepare.ps1 '${{ matrix.arch }}'
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ steps.prepare.outputs.key }}
+        path: ${{ steps.prepare.outputs.key }}.zip
+
+  release:
+    needs: [build]
+
+    name: Release artifacts
+
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+      with: { path: artifacts }
+
+    - name: Delete artifacts from storage
+      uses: GeekyEggo/delete-artifact@v2
+      with: { name: clang-format-* }
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      env: { GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
+      with: { files: artifacts/*/*.zip }
