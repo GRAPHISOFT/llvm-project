@@ -506,9 +506,10 @@ private:
         // NOTE: We use AfterClass (whereas AfterStruct exists) for both classes
         // and structs, but it seems that wrapping is still handled correctly
         // elsewhere.
-        ShouldMerge = !Style.BraceWrapping.AfterClass ||
-                      (NextLine.First->is(tok::r_brace) &&
-                       !Style.BraceWrapping.SplitEmptyRecord);
+        ShouldMerge =
+            Style.BraceWrapping.AfterClass == FormatStyle::BWAC_Never ||
+            (NextLine.First->is(tok::r_brace) &&
+             !Style.BraceWrapping.SplitEmptyRecord);
       } else {
         // Try to merge a block with left brace unwrapped that wasn't yet
         // covered.

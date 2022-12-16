@@ -943,6 +943,29 @@ struct FormatStyle {
   /// \version 12
   BitFieldColonSpacingStyle BitFieldColonSpacing;
 
+  /// Different ways to wrap braces after a class.
+  enum BraceWrappingAfterClassStyle : int8_t {
+    /// Never wrap braces after a class.
+    /// \code
+    ///   class Derived : Base,
+    ///                   Interface {};
+    /// \endcode
+    BWAC_Never,
+    /// Only wrap braces after a multi-line class.
+    /// \code
+    ///   class Derived : Base,
+    ///                   Interface
+    ///   {};
+    /// \endcode
+    BWAC_MultiLine,
+    /// Always wrap braces after a class.
+    /// \code
+    ///   class Class
+    ///   {};
+    /// \endcode
+    BWAC_Always
+  };
+
   /// Different ways to wrap braces after control statements.
   enum BraceWrappingAfterControlStatementStyle : int8_t {
     /// Never wrap braces after a control statement.
@@ -1001,16 +1024,9 @@ struct FormatStyle {
     ///                                         }
     /// \endcode
     bool AfterCaseLabel;
+
     /// Wrap class definitions.
-    /// \code
-    ///   true:
-    ///   class foo
-    ///   {};
-    ///
-    ///   false:
-    ///   class foo {};
-    /// \endcode
-    bool AfterClass;
+    BraceWrappingAfterClassStyle AfterClass;
 
     /// Wrap control statements (``if``/``for``/``while``/``switch``/..).
     BraceWrappingAfterControlStatementStyle AfterControlStatement;
