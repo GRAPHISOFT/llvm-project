@@ -5027,6 +5027,15 @@ bool TokenAnnotator::mustBreakBefore(const AnnotatedLine &Line,
       Left.is(TT_InheritanceComma)) {
     return true;
   }
+  if (Style.BraceWrapping.AfterClass == FormatStyle::BWAC_MultiLine &&
+      Right.is(tok::l_brace)) {
+    for (const FormatToken *Token = Right.Previous;
+         Token != nullptr && !Token->is(TT_InheritanceColon);
+         Token = Token->Previous) {
+      if (Token->is(TT_InheritanceComma))
+        return true;
+    }
+  }
   if (Right.is(tok::string_literal) && Right.TokenText.startswith("R\"")) {
     // Multiline raw string literals are special wrt. line breaks. The author
     // has made a deliberate choice and might have aligned the contents of the
@@ -5063,7 +5072,7 @@ bool TokenAnnotator::mustBreakBefore(const AnnotatedLine &Line,
     }
 
     // Ensure BraceWrapping for `public interface A {`.
-    if (Style.BraceWrapping.AfterClass &&
+    if (Style.BraceWrapping.AfterClass == FormatStyle::BWAC_Always &&
         ((AccessSpecifier && FirstNonComment->Next &&
           FirstNonComment->Next->is(Keywords.kw_interface)) ||
          Line.startsWith(Keywords.kw_interface))) {
@@ -5073,7 +5082,7 @@ bool TokenAnnotator::mustBreakBefore(const AnnotatedLine &Line,
     // Don't attempt to interpret struct return types as structs.
     if (Right.isNot(TT_FunctionLBrace)) {
       return (Line.startsWith(tok::kw_class) &&
-              Style.BraceWrapping.AfterClass) ||
+              Style.BraceWrapping.AfterClass == FormatStyle::BWAC_Always) ||
              (Line.startsWith(tok::kw_struct) &&
               Style.BraceWrapping.AfterStruct);
     }

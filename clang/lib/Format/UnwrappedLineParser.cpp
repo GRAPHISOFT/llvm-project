@@ -943,7 +943,7 @@ static bool ShouldBreakBeforeBrace(const FormatStyle &Style,
   case tok::kw_namespace:
     return Style.BraceWrapping.AfterNamespace;
   case tok::kw_class:
-    return Style.BraceWrapping.AfterClass;
+    return Style.BraceWrapping.AfterClass == FormatStyle::BWAC_Always;
   case tok::kw_union:
     return Style.BraceWrapping.AfterUnion;
   case tok::kw_struct:

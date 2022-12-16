@@ -221,6 +221,20 @@ template <> struct ScalarEnumerationTraits<FormatStyle::BracketAlignmentStyle> {
 };
 
 template <>
+struct ScalarEnumerationTraits<FormatStyle::BraceWrappingAfterClassStyle> {
+  static void enumeration(IO &IO,
+                          FormatStyle::BraceWrappingAfterClassStyle &Value) {
+    IO.enumCase(Value, "Never", FormatStyle::BWAC_Never);
+    IO.enumCase(Value, "MultiLine", FormatStyle::BWAC_MultiLine);
+    IO.enumCase(Value, "Always", FormatStyle::BWAC_Always);
+
+    // For backward compatibility.
+    IO.enumCase(Value, "false", FormatStyle::BWAC_Never);
+    IO.enumCase(Value, "true", FormatStyle::BWAC_Always);
+  }
+};
+
+template <>
 struct ScalarEnumerationTraits<
     FormatStyle::BraceWrappingAfterControlStatementStyle> {
   static void
@@ -1248,7 +1262,7 @@ static void expandPresetsBraceWrapping(FormatStyle &Expanded) {
   if (Expanded.BreakBeforeBraces == FormatStyle::BS_Custom)
     return;
   Expanded.BraceWrapping = {/*AfterCaseLabel=*/false,
-                            /*AfterClass=*/false,
+                            /*AfterClass=*/FormatStyle::BWAC_Never,
                             /*AfterControlStatement=*/FormatStyle::BWACS_Never,
                             /*AfterEnum=*/false,
                             /*AfterFunction=*/false,
@@ -1267,12 +1281,12 @@ static void expandPresetsBraceWrapping(FormatStyle &Expanded) {
                             /*SplitEmptyNamespace=*/true};
   switch (Expanded.BreakBeforeBraces) {
   case FormatStyle::BS_Linux:
-    Expanded.BraceWrapping.AfterClass = true;
+    Expanded.BraceWrapping.AfterClass = FormatStyle::BWAC_Always;
     Expanded.BraceWrapping.AfterFunction = true;
     Expanded.BraceWrapping.AfterNamespace = true;
     break;
   case FormatStyle::BS_Mozilla:
-    Expanded.BraceWrapping.AfterClass = true;
+    Expanded.BraceWrapping.AfterClass = FormatStyle::BWAC_Always;
     Expanded.BraceWrapping.AfterEnum = true;
     Expanded.BraceWrapping.AfterFunction = true;
     Expanded.BraceWrapping.AfterStruct = true;
@@ -1289,7 +1303,7 @@ static void expandPresetsBraceWrapping(FormatStyle &Expanded) {
     break;
   case FormatStyle::BS_Allman:
     Expanded.BraceWrapping.AfterCaseLabel = true;
-    Expanded.BraceWrapping.AfterClass = true;
+    Expanded.BraceWrapping.AfterClass = FormatStyle::BWAC_Always;
     Expanded.BraceWrapping.AfterControlStatement = FormatStyle::BWACS_Always;
     Expanded.BraceWrapping.AfterEnum = true;
     Expanded.BraceWrapping.AfterFunction = true;
@@ -1305,7 +1319,7 @@ static void expandPresetsBraceWrapping(FormatStyle &Expanded) {
     break;
   case FormatStyle::BS_Whitesmiths:
     Expanded.BraceWrapping.AfterCaseLabel = true;
-    Expanded.BraceWrapping.AfterClass = true;
+    Expanded.BraceWrapping.AfterClass = FormatStyle::BWAC_Always;
     Expanded.BraceWrapping.AfterControlStatement = FormatStyle::BWACS_Always;
     Expanded.BraceWrapping.AfterEnum = true;
     Expanded.BraceWrapping.AfterFunction = true;
@@ -1321,7 +1335,7 @@ static void expandPresetsBraceWrapping(FormatStyle &Expanded) {
   case FormatStyle::BS_GNU:
     Expanded.BraceWrapping = {
         /*AfterCaseLabel=*/true,
-        /*AfterClass=*/true,
+        /*AfterClass=*/FormatStyle::BWAC_Always,
         /*AfterControlStatement=*/FormatStyle::BWACS_Always,
         /*AfterEnum=*/true,
         /*AfterFunction=*/true,
@@ -1424,7 +1438,7 @@ FormatStyle getLLVMStyle(FormatStyle::LanguageKind Language) {
   LLVMStyle.BinPackParameters = true;
   LLVMStyle.BracedInitializerIndentWidth = std::nullopt;
   LLVMStyle.BraceWrapping = {/*AfterCaseLabel=*/false,
-                             /*AfterClass=*/false,
+                             /*AfterClass=*/FormatStyle::BWAC_Never,
                              /*AfterControlStatement=*/FormatStyle::BWACS_Never,
                              /*AfterEnum=*/false,
                              /*AfterFunction=*/false,
@@ -1859,7 +1873,7 @@ FormatStyle getMicrosoftStyle(FormatStyle::LanguageKind Language) {
   Style.IndentWidth = 4;
   Style.UseTab = FormatStyle::UT_Never;
   Style.BreakBeforeBraces = FormatStyle::BS_Custom;
-  Style.BraceWrapping.AfterClass = true;
+  Style.BraceWrapping.AfterClass = FormatStyle::BWAC_Always;
   Style.BraceWrapping.AfterControlStatement = FormatStyle::BWACS_Always;
   Style.BraceWrapping.AfterEnum = true;
   Style.BraceWrapping.AfterFunction = true;
@@ -1900,7 +1914,7 @@ FormatStyle getGraphisoftStyle() {
   Style.AlwaysBreakTemplateDeclarations = FormatStyle::BTDS_Yes;
   Style.BinPackArguments = false;
   Style.BinPackParameters = false;
-  Style.BraceWrapping.AfterClass = true;
+  Style.BraceWrapping.AfterClass = FormatStyle::BWAC_MultiLine;
   Style.BraceWrapping.AfterControlStatement = FormatStyle::BWACS_MultiLine;
   Style.BraceWrapping.AfterFunction = true;
   Style.BraceWrapping.AfterStruct = true;
