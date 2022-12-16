@@ -1476,6 +1476,7 @@ FormatStyle getLLVMStyle(FormatStyle::LanguageKind Language) {
   LLVMStyle.DisableFormat = false;
   LLVMStyle.EmptyLineAfterAccessModifier = FormatStyle::ELAAMS_Never;
   LLVMStyle.EmptyLineBeforeAccessModifier = FormatStyle::ELBAMS_LogicalBlock;
+  LLVMStyle.EmptyLinesAroundFunctionDefinitions = 1;
   LLVMStyle.ExperimentalAutoDetectBinPacking = false;
   LLVMStyle.FixNamespaceComments = true;
   LLVMStyle.ForEachMacros.push_back("foreach");
@@ -1907,8 +1908,8 @@ FormatStyle getGraphisoftStyle() {
   Style.AlignConsecutiveMacros.Enabled = true;
   Style.AlignConsecutiveMacros.PadOperators = true;
   Style.AlignEscapedNewlines = FormatStyle::ENAS_DontAlign;
-  Style.AllowShortEnumsOnASingleLine = false;
   Style.AllowShortBlocksOnASingleLine = FormatStyle::SBS_Empty;
+  Style.AllowShortEnumsOnASingleLine = false;
   Style.AllowShortFunctionsOnASingleLine = FormatStyle::SFS_Inline;
   Style.AllowShortIfStatementsOnASingleLine = FormatStyle::SIS_WithoutElse;
   Style.AlwaysBreakTemplateDeclarations = FormatStyle::BTDS_Yes;
@@ -1920,16 +1921,17 @@ FormatStyle getGraphisoftStyle() {
   Style.BraceWrapping.AfterStruct = true;
   Style.BraceWrapping.AfterUnion = true;
   Style.BreakBeforeBraces = FormatStyle::BS_Custom;
-  Style.BreakInheritanceList = FormatStyle::BILS_AfterComma;
   Style.BreakConstructorInitializers = FormatStyle::BCIS_AfterColon;
+  Style.BreakInheritanceList = FormatStyle::BILS_AfterComma;
   Style.ColumnLimit = 120u;
-  Style.QualifierAlignment = FormatStyle::QAS_Left;
   Style.EmptyLineBeforeAccessModifier = FormatStyle::ELBAMS_Always;
-  Style.PackConstructorInitializers = FormatStyle::PCIS_CurrentLine;
+  Style.EmptyLinesAroundFunctionDefinitions = 2u;
   Style.IndentCaseLabels = true;
   Style.IndentRequiresClause = false;
   Style.IndentWidth = 4u;
+  Style.PackConstructorInitializers = FormatStyle::PCIS_CurrentLine;
   Style.PointerAlignment = FormatStyle::PAS_Left;
+  Style.QualifierAlignment = FormatStyle::QAS_Left;
   Style.SeparateDefinitionBlocks = FormatStyle::SDS_Always;
   Style.SpaceBeforeCpp11BracedList = true;
   Style.SpaceBeforeParens = FormatStyle::SBPO_Always;

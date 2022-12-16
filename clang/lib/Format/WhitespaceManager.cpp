@@ -137,9 +137,7 @@ unsigned WhitespaceManager::calculateNewlinesCountOrElse(
     const llvm::SmallVectorImpl<AnnotatedLine *> &Lines,
     const AnnotatedLine &CurrentLine, const AnnotatedLine *PreviousLine,
     std::function<unsigned()> Else) const {
-  // FIXME(HVA): figure out a way to not hard code the value, maybe add a style
-  // option?
-  constexpr unsigned NewlinesCount = 3u;
+  unsigned NewlinesCount = Style.EmptyLinesAroundFunctionDefinitions + 1;
 
   if (LikelyFunctionDef(CurrentLine))
     return NewlinesCount;

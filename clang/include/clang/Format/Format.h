@@ -2294,6 +2294,10 @@ struct FormatStyle {
   /// \version 12
   EmptyLineBeforeAccessModifierStyle EmptyLineBeforeAccessModifier;
 
+  /// Define the number of empty lines around free function definitions and
+  /// out-of-line member function definitions.
+  unsigned EmptyLinesAroundFunctionDefinitions;
+
   /// If ``true``, clang-format detects whether function calls and
   /// definitions are formatted with one parameter per line.
   ///
