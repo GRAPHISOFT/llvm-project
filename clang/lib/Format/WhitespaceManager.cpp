@@ -120,6 +120,18 @@ static bool LikelyFunctionDef(const AnnotatedLine &Line) {
          Line.mightBeFunctionDefinition();
 }
 
+static AnnotatedLine *
+GetNextLine(const AnnotatedLine &Line,
+            const llvm::SmallVectorImpl<AnnotatedLine *> &Lines) {
+  size_t Size = Lines.size();
+  if (Size < 2)
+    return nullptr;
+
+  auto End = Lines.end();
+  auto It = std::find(Lines.begin(), End, &Line);
+  return It != End && ++ It != End ? *It : nullptr;
+}
+
 static bool LikelyFunctionDefBeforePrevBlock(
     const AnnotatedLine &Line,
     const llvm::SmallVectorImpl<AnnotatedLine *> &Lines) {
@@ -139,8 +151,16 @@ unsigned WhitespaceManager::calculateNewlinesCountOrElse(
     std::function<unsigned()> Else) const {
   unsigned NewlinesCount = Style.EmptyLinesAroundFunctionDefinitions + 1;
 
-  if (LikelyFunctionDef(CurrentLine))
-    return NewlinesCount;
+  if (LikelyFunctionDef(CurrentLine)) {
+    return PreviousLine != nullptr && PreviousLine->isComment() ? 0
+                                                                : NewlinesCount;
+  }
+
+  if (CurrentLine.isComment()) {
+    AnnotatedLine *NextLine = GetNextLine(CurrentLine, Lines);
+    if (NextLine != nullptr && LikelyFunctionDef(*NextLine))
+      return NewlinesCount;
+  }
 
   if (PreviousLine == nullptr)
     return Else();
