@@ -1918,12 +1918,12 @@ FormatStyle getGraphisoftStyle() {
   Style.BraceWrapping.AfterClass = FormatStyle::BWAC_MultiLine;
   Style.BraceWrapping.AfterControlStatement = FormatStyle::BWACS_MultiLine;
   Style.BraceWrapping.AfterFunction = true;
-  Style.BraceWrapping.AfterStruct = true;
-  Style.BraceWrapping.AfterUnion = true;
+  Style.BraceWrapping.AfterStruct = false;
+  Style.BraceWrapping.AfterUnion = false;
   Style.BreakBeforeBraces = FormatStyle::BS_Custom;
   Style.BreakConstructorInitializers = FormatStyle::BCIS_AfterColon;
   Style.BreakInheritanceList = FormatStyle::BILS_AfterComma;
-  Style.ColumnLimit = 120u;
+  Style.ColumnLimit = 150u;
   Style.EmptyLineBeforeAccessModifier = FormatStyle::ELBAMS_Always;
   Style.EmptyLinesAroundFunctionDefinitions = 2u;
   Style.IndentCaseLabels = true;
