@@ -507,7 +507,7 @@ TEST_F(FormatTest, RemovesEmptyLines) {
   Style.AllowShortFunctionsOnASingleLine = FormatStyle::SFS_All;
   Style.MaxEmptyLinesToKeep = 2;
   Style.BreakBeforeBraces = FormatStyle::BS_Custom;
-  Style.BraceWrapping.AfterClass = true;
+  Style.BraceWrapping.AfterClass = FormatStyle::BWAC_Always;
   Style.BraceWrapping.AfterFunction = true;
   Style.KeepEmptyLinesAtTheStartOfBlocks = false;
 
@@ -13568,7 +13568,7 @@ TEST_F(FormatTest, PullInlineFunctionDefinitionsIntoSingleLine) {
                "};",
                MergeInlineOnly);
 
-  MergeInlineOnly.BraceWrapping.AfterClass = true;
+  MergeInlineOnly.BraceWrapping.AfterClass = FormatStyle::BWAC_Always;
   MergeInlineOnly.BraceWrapping.AfterStruct = true;
   verifyFormat("class C\n"
                "{\n"
@@ -13768,7 +13768,7 @@ TEST_F(FormatTest, KeepShortFunctionAfterPPElse) {
 TEST_F(FormatTest, SplitEmptyClass) {
   FormatStyle Style = getLLVMStyle();
   Style.BreakBeforeBraces = FormatStyle::BS_Custom;
-  Style.BraceWrapping.AfterClass = true;
+  Style.BraceWrapping.AfterClass = FormatStyle::BWAC_Always;
   Style.BraceWrapping.SplitEmptyRecord = false;
 
   verifyFormat("class Foo\n"
@@ -13982,7 +13982,7 @@ TEST_F(FormatTest, NeverMergeShortRecords) {
                Style);
 
   Style.BreakBeforeBraces = FormatStyle::BS_Custom;
-  Style.BraceWrapping.AfterClass = true;
+  Style.BraceWrapping.AfterClass = FormatStyle::BWAC_Always;
   Style.BraceWrapping.AfterStruct = true;
   Style.BraceWrapping.AfterUnion = true;
   Style.BraceWrapping.AfterNamespace = true;
