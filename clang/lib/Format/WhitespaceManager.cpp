@@ -152,14 +152,23 @@ unsigned WhitespaceManager::calculateNewlinesCountOrElse(
   unsigned NewlinesCount = Style.EmptyLinesAroundFunctionDefinitions + 1;
 
   if (LikelyFunctionDef(CurrentLine)) {
-    return PreviousLine != nullptr && PreviousLine->isComment() ? 0
-                                                                : NewlinesCount;
+    if (PreviousLine != nullptr) {
+      FormatToken *Token = CurrentLine.First;
+      if (Token != nullptr && Token->NewlinesBefore == 1 &&
+          PreviousLine->isComment()) {
+        return 0;
+      }
+    }
+    return NewlinesCount;
   }
 
   if (CurrentLine.isComment()) {
     AnnotatedLine *NextLine = GetNextLine(CurrentLine, Lines);
-    if (NextLine != nullptr && LikelyFunctionDef(*NextLine))
-      return NewlinesCount;
+    if (NextLine != nullptr) {
+      FormatToken *Token = NextLine->First;
+      if (Token != nullptr && Token->NewlinesBefore == 1)
+        return NewlinesCount;
+    }
   }
 
   if (PreviousLine == nullptr)
