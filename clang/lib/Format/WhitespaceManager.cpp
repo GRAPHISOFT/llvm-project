@@ -166,8 +166,10 @@ unsigned WhitespaceManager::calculateNewlinesCountOrElse(
     AnnotatedLine *NextLine = GetNextLine(CurrentLine, Lines);
     if (NextLine != nullptr) {
       FormatToken *Token = NextLine->First;
-      if (Token != nullptr && Token->NewlinesBefore == 1)
+      if (Token != nullptr && Token->NewlinesBefore == 1 &&
+          LikelyFunctionDef(*NextLine)) {
         return NewlinesCount;
+      }
     }
   }
 
