@@ -156,7 +156,7 @@ unsigned WhitespaceManager::calculateNewlinesCountOrElse(
       FormatToken *Token = CurrentLine.First;
       if (Token != nullptr && Token->NewlinesBefore == 1 &&
           PreviousLine->isComment()) {
-        return 0;
+        return Else();
       }
     }
     return NewlinesCount;
