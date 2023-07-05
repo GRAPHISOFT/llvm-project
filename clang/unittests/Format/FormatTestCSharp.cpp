@@ -1368,7 +1368,7 @@ TEST_F(FormatTestCSharp, CSharpAfterEnum) {
 TEST_F(FormatTestCSharp, CSharpAfterClass) {
   FormatStyle Style = getGoogleStyle(FormatStyle::LK_CSharp);
   Style.BreakBeforeBraces = FormatStyle::BS_Custom;
-  Style.BraceWrapping.AfterClass = false;
+  Style.BraceWrapping.AfterClass = FormatStyle::BWAC_Never;
 
   verifyFormat("class MyClass {\n"
                "  int a;\n"
@@ -1422,7 +1422,7 @@ TEST_F(FormatTestCSharp, CSharpAfterClass) {
                "}",
                Style);
 
-  Style.BraceWrapping.AfterClass = true;
+  Style.BraceWrapping.AfterClass = FormatStyle::BWAC_Always;
 
   verifyFormat("class MyClass\n"
                "{\n"

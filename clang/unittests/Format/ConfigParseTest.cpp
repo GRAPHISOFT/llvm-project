@@ -197,7 +197,6 @@ TEST(ConfigParseTest, ParsesConfigurationBools) {
   CHECK_PARSE_NESTED_BOOL(AlignConsecutiveShortCaseStatements, AcrossComments);
   CHECK_PARSE_NESTED_BOOL(AlignConsecutiveShortCaseStatements, AlignCaseColons);
   CHECK_PARSE_NESTED_BOOL(BraceWrapping, AfterCaseLabel);
-  CHECK_PARSE_NESTED_BOOL(BraceWrapping, AfterClass);
   CHECK_PARSE_NESTED_BOOL(BraceWrapping, AfterEnum);
   CHECK_PARSE_NESTED_BOOL(BraceWrapping, AfterFunction);
   CHECK_PARSE_NESTED_BOOL(BraceWrapping, AfterNamespace);
@@ -657,6 +656,25 @@ TEST(ConfigParseTest, ParsesConfiguration) {
   CHECK_PARSE("BraceWrapping:\n"
               "  AfterControlStatement: false",
               BraceWrapping.AfterControlStatement, FormatStyle::BWACS_Never);
+
+  Style.BraceWrapping.AfterClass = FormatStyle::BWAC_Never;
+  CHECK_PARSE("BraceWrapping:\n"
+              "  AfterClass: MultiLine",
+              BraceWrapping.AfterClass,
+              FormatStyle::BWAC_MultiLine);
+  CHECK_PARSE("BraceWrapping:\n"
+              "  AfterClass: Always",
+              BraceWrapping.AfterClass, FormatStyle::BWAC_Always);
+  CHECK_PARSE("BraceWrapping:\n"
+              "  AfterClass: Never",
+              BraceWrapping.AfterClass, FormatStyle::BWAC_Never);
+  // For backward compatibility:
+  CHECK_PARSE("BraceWrapping:\n"
+              "  AfterClass: true",
+              BraceWrapping.AfterClass, FormatStyle::BWAC_Always);
+  CHECK_PARSE("BraceWrapping:\n"
+              "  AfterClass: false",
+              BraceWrapping.AfterClass, FormatStyle::BWAC_Never);
 
   Style.AlwaysBreakAfterReturnType = FormatStyle::RTBS_All;
   CHECK_PARSE("AlwaysBreakAfterReturnType: None", AlwaysBreakAfterReturnType,
